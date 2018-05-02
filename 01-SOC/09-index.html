@@ -19,6 +19,7 @@
 		}
 	</style>
 	<script src="jquery-3.3.1.js"></script>
+	<script src="handlebars.js"></script>
 	<script>
 		String.prototype.toInt = function() {
 			return parseInt(this, 10);
@@ -42,26 +43,29 @@
 			this.set = function(attrName, value){
 				if (_data[attrName] === value) return;
 				_data[attrName] = value;
-				triggerChange(attrName);
+				triggerChange();
 			};
-			function triggerChange(attrName){
-				var listenerFns = _changeListeners[attrName];
-				listenerFns.forEach(function(listenerFn){
+			function triggerChange(){
+				_changeListeners.forEach(function(listenerFn){
 					if (typeof listenerFn === 'function')
 						listenerFn();
 				});
 			}
 
-			var _changeListeners = {
-				basic : [],
-				hra : [],
-				da : [],
-				tax : [],
-				salary : []
+			var _changeListeners = [];
+
+			this.subscribe = function(listenerFn){
+				_changeListeners.push(listenerFn);
 			};
 
-			this.subscribe = function(attrName, listenerFn){
-				_changeListeners[attrName].push(listenerFn);
+			this.toJSON = function(){
+				return {
+					basic : _data.basic,
+					hra : _data.hra,
+					da : _data.da,
+					tax : _data.tax,
+					salary : _data.salary
+				};
 			}
 		}
 		SalaryCalculator.prototype.calculate = function() {
@@ -100,11 +104,11 @@
 					<table>
 						<tbody>
 							<tr>
-								<td id="tdBasic">[Basic]</td>
-								<td id="tdHra">[HRA]</td>
-								<td id="tdDa">[DA]</td>
-								<td id="tdTax">[Tax]</td>
-								<td id="tdSalary">[Salary]</td>
+								<td id="tdBasic">{{basic}}</td>
+								<td id="tdHra">{{hra}}</td>
+								<td id="tdDa">{{da}}</td>
+								<td id="tdTax">{{tax}}</td>
+								<td id="tdSalary">{{salary}}</td>
 							</tr>
 						</tbody>
 					</table>
@@ -112,9 +116,12 @@
 			`;
 
 			var $root = this.$root = $('<div></div>');
+			var templateFn = Handlebars.compile(_template);
 
 			this.render = function(){
-				$root.html(_template);
+				var data = model.toJSON();
+				var generatedHTML = templateFn(data);
+				$root.html(generatedHTML);
 			};
 
 
@@ -138,25 +145,8 @@
 			});
 
 			//Reacts to model changes
-			calculator.subscribe('basic', function(){
-				$('#tdBasic', $root).html(calculator.get('basic'));
-			});
-
-			calculator.subscribe('hra', function(){
-				$('#tdHra', $root).html(calculator.get('hra'));
-			});
-
-			calculator.subscribe('da', function(){
-				$('#tdDa', $root).html(calculator.get('da'));
-			});
-
-			calculator.subscribe('tax', function(){
-				$('#tdTax', $root).html(calculator.get('tax'));
-			});
-
-			calculator.subscribe('salary', function(){
-				$('#tdSalary', $root).html(calculator.get('salary'));
-			});
+			calculator.subscribe(this.render);
+			
 		}
 
 		$(function(){
@@ -166,9 +156,9 @@
 			view1.render();
 			view1.$root.appendTo(document.body);
 
-			var view2 = new SalaryCalculatorView(model);
+			/*var view2 = new SalaryCalculatorView(model);
 			view2.render();
-			view2.$root.appendTo(document.body);
+			view2.$root.appendTo(document.body);*/
 		})
 	</script>
 </head>
