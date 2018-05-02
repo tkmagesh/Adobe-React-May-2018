@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Salary Calculator</title>
+	<style>
+		body{
+			margin-left: 50px;
+		}
+		.field{
+			margin-bottom: 10px;
+		}
+		label{
+			display: block;
+		}
+		#tdSalary{
+			color : red;
+			font-size: 18pt;
+		}
+	</style>
+	<script src="jquery-3.3.1.js"></script>
+	<script>
+		String.prototype.toInt = function() {
+			return parseInt(this, 10);
+		};
+
+		//state & behavior of a calculator
+		//Model
+		function SalaryCalculator(){
+			var _data = {
+				basic : 0,
+				hra : 0,
+				da : 0,
+				tax : 0,
+				salary : 0
+			};
+
+			this.get = function(attrName){
+				return _data[attrName];
+			};
+
+			this.set = function(attrName, value){
+				if (_data[attrName] === value) return;
+				_data[attrName] = value;
+				var listenerFn = _changeListeners[attrName];
+				if (typeof listenerFn === 'function')
+					listenerFn();
+			};
+
+			var _changeListeners = {
+				basic : null,
+				hra : null,
+				da : null,
+				tax : null,
+				salary : null
+			};
+
+			this.subscribe = function(attrName, listenerFn){
+				_changeListeners[attrName] = listenerFn;
+			}
+		}
+		SalaryCalculator.prototype.calculate = function() {
+			var gross = this.get('basic') + this.get('hra') + this.get('da');
+			var net = gross * ((100-this.get('tax'))/100);
+			this.set('salary', net);
+			
+		};
+
+		//Interaction
+		//View
+		$(function(){
+			window.calculator = new SalaryCalculator();
+
+			//Reacts to user actions
+			$('#txtBasic').change(function(){
+				calculator.set('basic', $('#txtBasic').val().toInt());
+			});
+			$('#txtHra').change(function(){
+				calculator.set('hra', $('#txtHra').val().toInt());
+			});
+			$('#txtDa').change(function(){
+				calculator.set('da', $('#txtDa').val().toInt());
+			});
+			$('#rangeTax').change(function(){
+				calculator.set('tax', $('#rangeTax').val().toInt());
+			});
+
+			$('#btnCalculate').click(function(){
+				calculator.calculate();
+			});
+
+			//Reacts to model changes
+			calculator.subscribe('basic', function(){
+				$('#tdBasic').html(calculator.get('basic'));
+			});
+
+			calculator.subscribe('hra', function(){
+				$('#tdHra').html(calculator.get('hra'));
+			});
+
+			calculator.subscribe('da', function(){
+				$('#tdDa').html(calculator.get('da'));
+			});
+
+			calculator.subscribe('tax', function(){
+				$('#tdTax').html(calculator.get('tax'));
+			});
+
+			calculator.subscribe('salary', function(){
+				$('#tdSalary').html(calculator.get('salary'));
+			});
+		});
+	</script>
+</head>
+<body>
+	<h1>Salary Calculator</h1>
+	<hr>
+	<div class="field">
+		<label for="">Basic :</label>
+		<input type="number" id="txtBasic">
+	</div>
+	<div class="field">
+		<label for="">HRA :</label>
+		<input type="number" id="txtHra">
+	</div>
+	<div class="field">
+		<label for="">DA :</label>
+		<input type="number" id="txtDa">
+	</div>
+	<div class="field">
+		<label for="">Tax :</label>
+		<input type="range" name="" id="rangeTax" min="0" max="30" value="0">
+	</div>
+	<div class="field">
+		<input type="button" value="Calculate" id="btnCalculate">
+	</div>
+	<div class="field">
+		<table>
+			<tbody>
+				<tr>
+					<td id="tdBasic">[Basic]</td>
+					<td id="tdHra">[HRA]</td>
+					<td id="tdDa">[DA]</td>
+					<td id="tdTax">[Tax]</td>
+					<td id="tdSalary">[Salary]</td>
+				</tr>
+			</tbody>
+		</table>
+	</div>
+</body>
+</html>
