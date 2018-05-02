@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>React Intro</title>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script>
+		function init(){
+			var btnRender = document.getElementById('btnRender');
+			btnRender.addEventListener('click', onBtnRenderClick);
+		}
+		
+		var counter = 0;
+		function onBtnRenderClick(){
+			++counter;
+			var message = 'Welcome to React.js! - [' + counter + ']';
+
+			var content = React.createElement('div', null, 
+				React.createElement('h1', null, message),
+				React.createElement('hr', null, null),
+				React.createElement('div', null, 
+					React.createElement('p', null, 'Lorem ipsum dolor sit amet, consectetur adipisicing elit. Repellendus vitae unde voluptas perspiciatis, architecto iure cum placeat repudiandae dicta cupiditate totam excepturi, nihil qui expedita nulla. Perspiciatis, doloremque nesciunt dolores!'),
+					React.createElement('span', null, '[Created using React.js]')
+				)
+			);
+			
+			ReactDOM.render(content, document.getElementById('root'));
+		}
+		window.addEventListener('DOMContentLoaded', init);
+
+	</script>
+</head>
+<body>
+	<input type="button" value="Render" id="btnRender">
+	<div id="root"></div>
+
+</body>
+</html>
