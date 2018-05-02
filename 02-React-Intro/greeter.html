@@ -8,23 +8,39 @@
 	<script src="babel.min.js"></script>
 	<script type="text/babel">
 		class Greeter extends React.Component{
+			state = {
+				greetMessage : '[Dummy greet message]'	
+			};
+
+			txtNameRef = React.createRef();
 			
+			constructor(){
+				super();
+				this.onGreetClick = this.onGreetClick.bind(this);
+			}
+
+			onGreetClick(){
+				var userName = this.txtNameRef.current.value;
+				var newMessage = 'Hi ' + userName + ', ' + this.props.template;
+				this.setState({greetMessage : newMessage});
+			}
 			render(){
-				var greetMessage = '[Dummy greet message]';
 				return(
 					<div>
 						<h1>Greeter</h1>
 						<hr/>
 						<label>User Name :</label>
-						<input type="text" />
-						<input type="button" value="Greet" />
-						<h3>{greetMessage}</h3>
+						<input type="text" ref={this.txtNameRef} />
+						<input type="button" value="Greet" onClick={this.onGreetClick}/>
+						<h3>{this.state.greetMessage}</h3>
 					</div>
 				);
 			}
 		}
 
-		ReactDOM.render(<Greeter />,
+		var greetTemplate = 'Have a great day!';
+
+		ReactDOM.render(<Greeter template={greetTemplate}/>,
 			document.getElementById('root'));
 	</script>
 </head>
