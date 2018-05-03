@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug Tracker</title>
+	<script type="text/usecases">
+		1. add new bugs
+		2. list the bugs
+		3. toggle 'closed' status of any bug
+		4. remove closed bugs
+		5. display stats (# of closed bugs / total # of bugs)
+		6. sort the bugs
+		7. persist the bugs in the server
+		8. make the bugs accessible using unique urls
+	</script>
+	<style>
+		body{
+			margin-left: 50px;
+		}
+		.bugname, .stats{
+			font-size: 20pt;
+		}
+		.bugname{
+			cursor: pointer;
+		}
+		section{
+			margin-bottom: 10px;
+		}
+		.closed{
+			color : red;
+			text-decoration: line-through;
+			font-style: italic;
+			font-weight: bold;
+		}
+		ol{
+			width: 500px;
+			list-style: none;
+			-webkit-padding-start : 0px;
+		}
+		li{
+			border : 1px solid gray;
+			background-color: #e7e7e7;
+			padding: 10px;
+			border-radius: 5px;
+			margin-bottom: 10px;
+		}
+	</style>
+</head>
+<body>
+	<h1>Bug Tracker</h1>
+	<hr>
+	<section class="stats">
+		<span class="closed">1</span>
+		<span> / </span>
+		<span>2</span>
+	</section>
+	<section class="sort">
+		<label for="">Order By :</label>
+		<select name="" id="">
+			<option value=""></option>
+			<option value=""></option>
+		</select>
+		<label for="">Descending ? :</label>
+		<input type="checkbox" name="" id="">
+	</section>
+	<section class="edit">
+		<label for="">Bug Name :</label>
+		<input type="text" name="" id="">
+		<input type="button" value="Add New">
+	</section>
+	<section class="list">
+		<ol>
+			<li>
+				<span class="bugname">This is bug - 1</span>
+				<div class="datetime">[Created At]</div>
+			</li>
+			<li>
+				<span class="bugname closed">This is bug - 2</span>
+				<div class="datetime">[Created At]</div>
+			</li>
+		</ol>
+		<input type="button" value="Remove Closed">
+	</section>
+</body>
+</html>
