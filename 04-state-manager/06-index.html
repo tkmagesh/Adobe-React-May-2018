@@ -32,22 +32,15 @@
 			constructor(props){
 				console.log(props);
 				super(props);
-				this.onIncrementClick = this.onIncrementClick.bind(this);
-				this.onDecrementClick = this.onDecrementClick.bind(this);
 			}
-			onIncrementClick(){
-				this.props.increment();
-			}
-			onDecrementClick(){
-				this.props.decrement();
-			}
+			
 			render(){
-				let { value } = this.props;
+				let { value, increment, decrement } = this.props;
 				return(
 					<div>
-						<input type="button" value="Decrement" onClick={this.onDecrementClick} />
+						<input type="button" value="Decrement" onClick={decrement} />
 						<span>[ {value} ]</span>
-						<input type="button" value="Increment" onClick={this.onIncrementClick}/>
+						<input type="button" value="Increment" onClick={increment}/>
 					</div>
 				)
 			}
