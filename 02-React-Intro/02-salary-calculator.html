@@ -14,8 +14,13 @@
 			display: block;
 		}
 		#tdSalary{
-			color : red;
 			font-size: 18pt;
+		}
+		.goodSalary {
+			color : green;
+		}
+		.poorSalary {
+			color : red;
 		}
 	</style>
 	<script src="react.js"></script>
@@ -86,14 +91,14 @@
 				this.onCalculateClick = this.onCalculateClick.bind(this);
 			}
 
-			onBasicChange(evt){
-				this.props.model.set('basic', evt.target.value.toInt());
+			onBasicChange(value){
+				this.props.model.set('basic', value);
 			}
-			onHraChange(evt){
-				this.props.model.set('hra', evt.target.value.toInt());
+			onHraChange(value){
+				this.props.model.set('hra', value);
 			}
-			onDaChange(evt){
-				this.props.model.set('da', evt.target.value.toInt());
+			onDaChange(value){
+				this.props.model.set('da', value);
 			}
 			onTaxChange(evt){
 				this.props.model.set('tax', evt.target.value.toInt());
@@ -105,40 +110,69 @@
 				var data = this.props.model.toJSON();
 				return(
 					<div>
-						<div className="field">
-							<label htmlFor="">Basic :</label>
-							<input type="number" id="txtBasic" onChange={this.onBasicChange}/>
-						</div>
-						<div className="field">
-							<label htmlFor="">HRA :</label>
-							<input type="number" id="txtHra" onChange={this.onHraChange}/>
-						</div>
-						<div className="field">
-							<label htmlFor="">DA :</label>
-							<input type="number" id="txtDa" onChange={this.onDaChange}/>
-						</div>
+						<SalaryInput labelName="Basic :" valueChange={this.onBasicChange} />
+						<SalaryInput labelName="HRA :" valueChange={this.onHraChange} />
+						<SalaryInput labelName="DA :" valueChange={this.onDaChange} />
 						<div className="field">
 							<label htmlFor="">Tax :</label>
-							<input type="range" id="rangeTax" min="0" max="30" defaultValue="0" onChange={this.onTaxChange}/>
+							<input type="range" min="0" max="30" defaultValue="0" onChange={this.onTaxChange}/>
 						</div>
 						<div className="field">
-							<input type="button" value="Calculate" id="btnCalculate" onClick={this.onCalculateClick}/>
+							<input type="button" value="Calculate" onClick={this.onCalculateClick}/>
 						</div>
-						<div className="field">
-							<table>
-								<tbody>
-									<tr>
-										<td id="tdBasic">{data.basic}</td>
-										<td id="tdHra">{data.hra}</td>
-										<td id="tdDa">{data.da}</td>
-										<td id="tdTax">{data.tax}</td>
-										<td id="tdSalary">{data.salary}</td>
-									</tr>
-								</tbody>
-							</table>
-						</div>
+						<SalaryOutput data={data}/>
 					</div>
 				);
+			}
+		}
+
+		class SalaryInput extends React.Component{
+			constructor(props){
+				super(props);
+				this.onInputChange = this.onInputChange.bind(this);
+			}
+			onInputChange(evt){
+				let value = evt.target.value.toInt();
+				this.props.valueChange(value);
+			}
+
+			render(){
+				let { labelName } = this.props
+				return(
+					<div className="field">
+						<label htmlFor="">{labelName}</label>
+						<input type="number" onChange={this.onInputChange}/>
+					</div>
+				)
+			}
+		}
+
+		class SalaryOutput extends React.Component{
+			render(){
+				let { data : {basic, hra, da, tax, salary} } = this.props;
+				
+				return(
+					<div className="field">
+						<table>
+							<tbody>
+								<tr>
+									<td id="tdBasic">{basic}</td>
+									<td id="tdHra">{hra}</td>
+									<td id="tdDa">{da}</td>
+									<td id="tdTax">{tax}</td>
+									<SalaryDisplay data={salary}/>
+								</tr>
+							</tbody>
+						</table>
+					</div>
+				)
+			}
+		}
+
+		class SalaryDisplay extends React.Component{
+			render(){
+				let salaryStyle = this.props.data < 10000 ? 'poorSalary' : 'goodSalary';
+				return this.props.data === 0 ? null : (<td id="tdSalary" className={salaryStyle}>{this.props.data}</td>);
 			}
 		}
 
