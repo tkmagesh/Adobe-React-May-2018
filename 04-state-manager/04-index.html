@@ -65,7 +65,7 @@
 
 		function renderApp(){
 			let value = store.getState();
-			ReactDOM.render(<Spinner value={value} action={spinnerActions} />, 
+			ReactDOM.render(<Spinner value={value} actions={spinnerActions} />, 
 				document.getElementById('root'));
 		}
 		renderApp();
