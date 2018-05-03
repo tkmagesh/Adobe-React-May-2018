@@ -59,37 +59,70 @@
 			}
 		}
 		class BugsCollection extends EventEmitter{
-			list = [
-				'This is bug - 11',
-				'This is bug - 22',
-				'This is bug - 33'
-			];
+			list = [];
 			constructor(){
 				super();
 			}
 			addNew(bugName){
-				this.list.push(bugName);
+				let newBug = new Bug(bugName);
+				this.list.push(newBug);
+				this.triggerChange();
+			}
+			removeClosed(){
+				this.list = this.list.filter(bug => !bug.isClosed);
 				this.triggerChange();
 			}
 		}
+		class Bug{
+			isClosed = false;
+			constructor(name){
+				this.name = name;
+			}
+			toggle(){
+				this.isClosed = !this.isClosed;
+			}
+		}
+
+		class BugItem extends React.Component{
+			constructor(props){
+				super(props);
+				this.onBugNameClick = this.onBugNameClick.bind(this);
+			}
+			onBugNameClick(){
+				this.props.model.toggle();
+				console.log(this.props.model);
+			}
+			render(){
+				let { model : bug } = this.props;
+				return(
+					<li>
+						<span className="bugname" onClick={this.onBugNameClick}>{bug.name}</span>
+						<div>[{bug.isClosed.toString()}]</div>
+						<div className="datetime">[Created At]</div>
+					</li>
+				)
+			}
+		}
+
 		class BugTracker extends React.Component{
 			txtBugNameRef = React.createRef();
 
 			constructor(props){
 				super(props);
 				this.onAddNewClick = this.onAddNewClick.bind(this);
+				this.onRemoveClosedClick = this.onRemoveClosedClick.bind(this);
 			}
 			onAddNewClick(){
 				let bugName = this.txtBugNameRef.current.value;
 				this.props.model.addNew(bugName);
 			}
+			onRemoveClosedClick(){
+				this.props.model.removeClosed();
+			}
 			render(){
 				let { list : bugs } = this.props.model,
 					bugItems = bugs.map((bug, index) => (
-						<li key={index}>
-							<span className="bugname">{bug}</span>
-							<div className="datetime">[Created At]</div>
-						</li>
+						<BugItem model={bug}  key={index} />
 					));
 
 				return(
@@ -117,7 +150,7 @@
 							<ol>
 								{bugItems}
 							</ol>
-							<input type="button" value="Remove Closed" />
+							<input type="button" value="Remove Closed" onClick={this.onRemoveClosedClick} />
 						</section>
 					</div>
 				);
