@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>React Intro</title>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="babel.min.js"></script>
+	<script type="text/babel">
+		class ProductList extends React.Component{
+			render(){
+				let products = ['Pen', 'Pencil', 'Marker', 'Scribble Pad'];
+				/*let productItems = [];
+				for(let index = 0, count = products.length; index < count; index++){
+					let productItem = (<li key={index}>{products[index]}</li>);
+					productItems.push(productItem);
+				}*/
+				let productItems = products.map((product,index) => (<li key={index}>{product}</li>));
+				return(
+					<ol>
+						{productItems}
+					</ol>
+				)
+			}
+		}
+		ReactDOM.render(<ProductList />,
+			document.getElementById('root'));
+	</script>
+</head>
+<body>
+	<h1>Products</h1>
+	<div id="root">
+	</div>
+
+</body>
+</html>
