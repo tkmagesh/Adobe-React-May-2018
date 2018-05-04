@@ -1,0 +1,236 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+	<meta charset="UTF-8">
+	<title>Bug Tracker</title>
+	<script type="text/usecases">
+		1. add new bugs
+		2. list the bugs
+		3. toggle 'closed' status of any bug
+		4. remove closed bugs
+		5. display stats (# of closed bugs / total # of bugs)
+		6. sort the bugs
+		7. persist the bugs in the server
+		8. make the bugs accessible using unique urls
+	</script>
+	<style>
+		body{
+			margin-left: 50px;
+		}
+		.bugname, .stats{
+			font-size: 20pt;
+		}
+		.bugname{
+			cursor: pointer;
+		}
+		section{
+			margin-bottom: 10px;
+		}
+		.closed{
+			color : red;
+			text-decoration: line-through;
+			font-style: italic;
+			font-weight: bold;
+		}
+		ol{
+			width: 500px;
+			list-style: none;
+			-webkit-padding-start : 0px;
+		}
+		li{
+			border : 1px solid gray;
+			background-color: #e7e7e7;
+			padding: 10px;
+			border-radius: 5px;
+			margin-bottom: 10px;
+		}
+	</style>
+	<script src="react.js"></script>
+	<script src="react-dom.js"></script>
+	<script src="babel.min.js"></script>
+	<script src="redux.js"></script>
+	<script type="text/babel">
+		let bugActionCreators = {
+			addNew(bugName){
+				return { type : 'ADD_NEW', payload : bugName};
+			},
+			toggle(bugToToggle){
+				return { type : 'TOGGLE', payload : bugToToggle};
+			},
+			removeClosed(){
+				return { type : 'REMOVE_CLOSED'};
+			}
+		}
+
+		function bugsReducer(currentState = [], action){
+			if (action.type === 'ADD_NEW'){
+				let newBug = { name : action.payload, isClosed : false};
+				return [...currentState, newBug];
+			}
+			if (action.type === "TOGGLE"){
+				let bugToToggle = action.payload;
+				let toggledBug = {...bugToToggle, isClosed : !bugToToggle.isClosed};
+				return currentState.map(bug => bug === bugToToggle ? toggledBug : bug);
+			}
+			if (action.type === 'REMOVE_CLOSED'){
+				return currentState.filter(bug => !bug.isClosed);
+			}
+			return currentState;
+		}
+
+		class BugItem extends React.Component{
+			constructor(props){
+				super(props);
+				this.onBugNameClick = this.onBugNameClick.bind(this);
+			}
+			onBugNameClick(){
+				this.props.toggle(this.props.model);
+			}
+			render(){
+				let { model : bug } = this.props;
+				let bugNameItem = bug.isClosed 
+					? (<span className="bugname closed" onClick={this.onBugNameClick}>{bug.name}</span>) 
+					: (<span className="bugname" onClick={this.onBugNameClick}>{bug.name}</span>);
+				return(
+					<li>
+						{bugNameItem}
+						<div className="datetime">[Created At]</div>
+					</li>
+				)
+			}
+		}
+
+		let BugStats = ({bugs}) => {
+			let closedCount = bugs.reduce((prevResult, bug) => bug.isClosed ? ++prevResult : prevResult, 0);
+			return (
+				<section className="stats">
+					<span className="closed">{closedCount}</span>
+					<span> / </span>
+					<span>{bugs.length}</span>
+				</section>
+			)
+		}
+		let BugSort = (props) => (
+			<section className="sort">
+				<label htmlFor="">Order By :</label>
+				<select name="" id="">
+					<option value=""></option>
+					<option value=""></option>
+				</select>
+				<label htmlFor="">Descending ? :</label>
+				<input type="checkbox" name="" id="" />
+			</section>
+		);
+
+		class BugEdit extends React.Component{
+			txtBugNameRef = React.createRef();
+			constructor(props){
+				super(props);
+				this.onAddNewClick = this.onAddNewClick.bind(this);
+			}
+			onAddNewClick(){
+				let bugName = this.txtBugNameRef.current.value;
+				this.props.addNew(bugName);
+			}
+			render(){
+				return (
+					<section className="edit">
+						<label htmlFor="">Bug Name :</label>
+						<input type="text" ref={this.txtBugNameRef} />
+						<input type="button" value="Add New" onClick={this.onAddNewClick} />
+					</section>
+				);
+			}
+		}
+
+		let BugList = ({bugs, toggle, removeClosed}) => {
+			let bugItems = bugs.map((bug, index) => (
+				<BugItem model={bug}  key={index} toggle={toggle}/>
+			));
+			return (
+				<section className="list">
+					<ol>
+						{bugItems}
+					</ol>
+					<input type="button" value="Remove Closed" onClick={() => removeClosed()} />
+				</section>
+			)
+		}
+
+		class BugTracker extends React.Component{
+			constructor(props){
+				super(props);
+			}
+			render(){
+				let { bugs, toggle, addNew, removeClosed } = this.props;
+				return(
+					<div>
+						<BugStats bugs={bugs} />
+						<BugSort />
+						<BugEdit addNew={addNew} />
+						<BugList {...{bugs, toggle, removeClosed}} />
+					</div>
+				);
+			}
+		}
+
+		{/* Spinner */}
+
+		function spinnerReducer(currentState = 0, action){
+			if (action.type === 'INCREMENT') return currentState + action.payload;
+			if (action.type === 'DECREMENT') return currentState - action.payload;
+			return currentState;
+		}
+		var spinnerActionCreators = {
+			increment(value = 1){
+				return { type : 'INCREMENT', payload : value};
+			},
+			decrement(value = 1){
+				return { type : 'DECREMENT', payload : value};
+			}
+		};
+		let Spinner = ({ value, increment, decrement }) => (
+			<div>
+				<input type="button" value="Decrement" onClick={() => decrement(3)} />
+				<span>[ {value} ]</span>
+				<input type="button" value="Increment" onClick={() => increment(2)}/>
+			</div>
+		);
+
+		{/* Store creating */}
+		let rootReducer = Redux.combineReducers({
+			spinnerData : spinnerReducer,
+			bugsData : bugsReducer
+		});
+
+		window.store = Redux.createStore(rootReducer);
+
+		{/* Actions */}
+		window.bugActions = Redux.bindActionCreators(bugActionCreators, store.dispatch);
+		window.spinnerActions = Redux.bindActionCreators(spinnerActionCreators, store.dispatch);
+		
+		function renderApp(){
+			let storeState = store.getState();
+			let bugs = storeState.bugsData,
+				spinnerValue = storeState.spinnerData;
+
+			ReactDOM.render(
+				<div>
+					<Spinner value={spinnerValue} {...spinnerActions} />
+					<hr/>
+					<BugTracker bugs={bugs} {...bugActions}/>
+				</div>,
+				document.getElementById('root'));
+		}
+		store.subscribe(renderApp);
+		renderApp();
+	</script>
+</head>
+<body>
+	<h1>Bug Tracker</h1>
+	<hr />
+	<div id="root">
+
+	</div>
+</body>
+</html>
