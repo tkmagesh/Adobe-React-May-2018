@@ -53,28 +53,29 @@
 	<script type="text/babel">
 		let bugActionCreators = {
 			addNew(bugName){
-				return { type : 'ADD_NEW', payload : bugName};
+				let newBug = { name : bugName, isClosed : false}
+				return { type : 'ADD_NEW', payload : newBug};
 			},
 			toggle(bugToToggle){
-				return { type : 'TOGGLE', payload : bugToToggle};
+				let toggledBug = {...bugToToggle, isClosed : !bugToToggle.isClosed};
+				return { type : 'UPDATE', payload : {oldBug : bugToToggle, newBug : toggledBug}};
 			},
-			removeClosed(){
-				return { type : 'REMOVE_CLOSED'};
+			removeClosed(bugs){
+				let closedBugs = bugs.filter(bug => bug.isClosed);
+				return { type : 'REMOVE', payload : closedBugs};
 			}
 		}
 
 		function bugsReducer(currentState = [], action){
 			if (action.type === 'ADD_NEW'){
-				let newBug = { name : action.payload, isClosed : false};
-				return [...currentState, newBug];
+				return [...currentState, action.payload];
 			}
-			if (action.type === "TOGGLE"){
-				let bugToToggle = action.payload;
-				let toggledBug = {...bugToToggle, isClosed : !bugToToggle.isClosed};
-				return currentState.map(bug => bug === bugToToggle ? toggledBug : bug);
+			if (action.type === 'UPDATE'){
+				return currentState.map(bug => bug === action.payload.oldBug ? action.payload.newBug : bug);
 			}
-			if (action.type === 'REMOVE_CLOSED'){
-				return currentState.filter(bug => !bug.isClosed);
+			if (action.type === 'REMOVE'){
+				let closedBugs = action.payload;
+				return currentState.filter(bug => closedBugs.indexOf(bug) === -1);
 			}
 			return currentState;
 		}
@@ -153,7 +154,7 @@
 					<ol>
 						{bugItems}
 					</ol>
-					<input type="button" value="Remove Closed" onClick={() => removeClosed()} />
+					<input type="button" value="Remove Closed" onClick={() => removeClosed(bugs)} />
 				</section>
 			)
 		}
